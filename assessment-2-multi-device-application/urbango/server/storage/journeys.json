@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1790164166814,
+    "routeNumber": "Journey",
+    "from": "Leyton Underground Station",
+    "to": "Aldershot Rail Station",
+    "nickname": "Leyton Underground Station to Aldershot Rail Station",
+    "type": "Planned Journey",
+    "favourite": true,
+    "savedAt": "2026-09-23T11:49:26.814Z"
+  },
+  {
+    "id": 1790177076362,
+    "routeNumber": "97",
+    "from": "London bus service",
+    "to": "London bus service",
+    "nickname": "Route 97",
+    "type": "Bus",
+    "favourite": false,
+    "savedAt": "2026-09-23T15:24:36.362Z"
+  },
+  {
+    "id": 1790177189123,
+    "routeNumber": "Journey",
+    "from": "Walthamstow Central",
+    "to": "London Liverpool Street Rail Station",
+    "nickname": "Walthamstow Central to London Liverpool Street Rail Station",
+    "type": "Planned Journey",
+    "favourite": false,
+    "savedAt": "2026-09-23T15:26:29.123Z"
+  }
+]

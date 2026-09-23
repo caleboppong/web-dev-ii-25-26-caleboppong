@@ -1,0 +1,23 @@
+{
+  "name": "urbango-server",
+  "version": "1.0.0",
+  "description": "Express backend for the UrbanGo London travel application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "urbango",
+    "express",
+    "tfl",
+    "travel"
+  ],
+  "author": "Caleb Oppong",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.2",
+    "express": "^5.2.1"
+  }
+}
