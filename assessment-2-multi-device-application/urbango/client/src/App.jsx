@@ -271,12 +271,12 @@ function App() {
     try {
       const payload = journey.number
         ? {
-            routeNumber: journey.number,
-            from: journey.from,
-            to: journey.to,
-            nickname: `Route ${journey.number}`,
-            type: journey.type || "Bus"
-          }
+          routeNumber: journey.number,
+          from: journey.from,
+          to: journey.to,
+          nickname: `Route ${journey.number}`,
+          type: journey.type || "Bus"
+        }
         : journey;
 
       if (!user) {
@@ -287,8 +287,7 @@ function App() {
       await createSavedJourney({ ...payload, ownerEmail: user.email });
 
       setNotice(
-        `${
-          payload.nickname || "Journey"
+        `${payload.nickname || "Journey"
         } saved successfully.`
       );
 
@@ -358,12 +357,14 @@ function App() {
       />
 
       <main>
-        <Hero
-          search={searchTerm}
-          setSearch={setSearchTerm}
-          onSearch={handleRouteSearch}
-          resultCount={routes.length}
-        />
+        <div id="buses">
+          <Hero
+            search={searchTerm}
+            setSearch={setSearchTerm}
+            onSearch={handleRouteSearch}
+            resultCount={routes.length}
+          />
+        </div>
 
         <div className="page-container">
           {hasSearchedRoutes && (

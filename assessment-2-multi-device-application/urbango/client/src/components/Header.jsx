@@ -5,7 +5,7 @@ function Header({ user, onSignIn, onSignOut }) {
   const navigationItems = [
     { id: 1, label: "Home", href: "#top" },
     { id: 2, label: "Plan", href: "#planner" },
-    { id: 3, label: "Buses", href: "#routes" },
+    { id: 3, label: "Buses", href: "#buses" },
     { id: 4, label: "Status", href: "#status" },
     { id: 5, label: "My journeys", href: "#journeys" },
     { id: 6, label: "Travel info", href: "#travel-info" }
