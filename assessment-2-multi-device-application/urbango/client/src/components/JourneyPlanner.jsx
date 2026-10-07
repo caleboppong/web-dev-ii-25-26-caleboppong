@@ -7,7 +7,7 @@ function getTodayDate() {
   return new Date().toISOString().split("T")[0];
 }
 
-function JourneyPlanner({ onSaveJourney }) {
+function JourneyPlanner({ onSaveJourney, onJourneyPlanned }) {
   const [fromText, setFromText] = useState("");
   const [toText, setToText] = useState("");
 
@@ -126,6 +126,15 @@ function JourneyPlanner({ onSaveJourney }) {
       }
 
       setJourneys(journeyOptions);
+      if (onJourneyPlanned) {
+        const firstJourney = journeyOptions[0];
+        onJourneyPlanned({
+          from: fromLocation.name,
+          to: toLocation.name,
+          duration: firstJourney?.duration ? `${firstJourney.duration} min` : "",
+          modes: Array.isArray(firstJourney?.modes) ? firstJourney.modes.join(" + ") : ""
+        });
+      }
     } catch (error) {
       setErrorMessage(error.message);
     } finally {

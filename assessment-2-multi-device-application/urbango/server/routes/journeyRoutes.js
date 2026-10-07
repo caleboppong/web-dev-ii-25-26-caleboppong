@@ -4,12 +4,14 @@ const { readJourneys, writeJourneys } = require("../services/journeyStore");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  const journeys = readJourneys();
+  const owner = String(req.query.owner || "").trim().toLowerCase();
+  const allJourneys = readJourneys();
+  const journeys = owner ? allJourneys.filter((journey) => journey.ownerEmail === owner) : allJourneys;
   res.status(200).json({ success: true, count: journeys.length, journeys });
 });
 
 router.post("/", (req, res) => {
-  const { routeNumber, from, to, nickname, type = "Bus" } = req.body;
+  const { routeNumber, from, to, nickname, type = "Bus", ownerEmail = "" } = req.body;
 
   if (!from?.trim() || !to?.trim()) {
     return res.status(400).json({
@@ -26,6 +28,7 @@ router.post("/", (req, res) => {
     to: to.trim(),
     nickname: nickname?.trim() || `${from.trim()} to ${to.trim()}`,
     type,
+    ownerEmail: String(ownerEmail).trim().toLowerCase(),
     favourite: false,
     savedAt: new Date().toISOString()
   };

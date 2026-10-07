@@ -20,18 +20,44 @@ function JourneyOption({
     onSaveJourney
 }) {
     const [expanded, setExpanded] = useState(index === 0);
+    const [saved, setSaved] = useState(false);
+    const [saving, setSaving] = useState(false);
 
-    function handleSave() {
-        onSaveJourney({
-            type: "Planned Journey",
-            from: fromName,
-            to: toName,
-            nickname: `${fromName} to ${toName}`,
-            duration: journey.duration,
-            modes: journey.modes,
-            favourite: false
-        });
+    async function handleSave() {
+        if (saved || saving) {
+            return;
+        }
+
+        try {
+            setSaving(true);
+
+            await onSaveJourney({
+                type: "Planned Journey",
+                from: fromName,
+                to: toName,
+                nickname: `${fromName} to ${toName}`,
+                duration: journey.duration,
+                modes: journey.modes,
+                favourite: false
+            });
+
+            setSaved(true);
+        } catch (error) {
+            console.error("Unable to save journey:", error);
+        } finally {
+            setSaving(false);
+        }
     }
+
+    const modeLabels = {
+        walking: "Walk",
+        bus: "Bus",
+        tube: "Tube",
+        overground: "Overground",
+        dlr: "DLR",
+        "elizabeth-line": "Elizabeth line",
+        "national-rail": "National Rail"
+    };
 
     return (
         <article className="journey-option">
@@ -77,19 +103,7 @@ function JourneyOption({
 
                 <span className="journey-modes">
                     {journey.modes
-                        .map((mode) => {
-                            const labels = {
-                                walking: "Walk",
-                                bus: "Bus",
-                                tube: "Tube",
-                                overground: "Overground",
-                                dlr: "DLR",
-                                "elizabeth-line": "Elizabeth line",
-                                "national-rail": "National Rail"
-                            };
-
-                            return labels[mode] || mode;
-                        })
+                        .map((mode) => modeLabels[mode] || mode)
                         .join(" + ")}
                 </span>
 
@@ -119,10 +133,17 @@ function JourneyOption({
 
                     <button
                         type="button"
-                        className="save-journey-button"
+                        className={`save-journey-button ${
+                            saved ? "is-saved" : ""
+                        }`}
                         onClick={handleSave}
+                        disabled={saved || saving}
                     >
-                        Save journey
+                        {saving
+                            ? "Saving..."
+                            : saved
+                                ? "Journey saved ✓"
+                                : "Save journey"}
                     </button>
                 </div>
             </div>

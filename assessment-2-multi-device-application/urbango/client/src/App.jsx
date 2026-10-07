@@ -9,6 +9,9 @@ import SavedJourney from "./components/SavedJourney";
 import Stats from "./components/Stats";
 import TravelInformation from "./components/TravelInformation";
 import AccommodationFinder from "./components/AccommodationFinder";
+import AuthModal from "./components/AuthModal";
+import TransportStory from "./components/TransportStory";
+import UserJourneyHub from "./components/UserJourneyHub";
 
 import {
   createSavedJourney,
@@ -27,6 +30,12 @@ import "./App.css";
 function App() {
   const [routes, setRoutes] = useState([]);
   const [savedJourneys, setSavedJourneys] = useState([]);
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("urbango-session") || "null"));
+  const [authOpen, setAuthOpen] = useState(false);
+  const [journeyHistory, setJourneyHistory] = useState(() => {
+    const session = JSON.parse(localStorage.getItem("urbango-session") || "null");
+    return session ? JSON.parse(localStorage.getItem(`urbango-history-${session.email}`) || "[]") : [];
+  });
 
   const [statistics, setStatistics] = useState({
     availableRoutes: 0,
@@ -79,9 +88,13 @@ function App() {
     }
   }
 
-  async function loadSavedJourneys() {
+  async function loadSavedJourneys(activeUser = user) {
+    if (!activeUser) {
+      setSavedJourneys([]);
+      return;
+    }
     try {
-      const data = await getSavedJourneys();
+      const data = await getSavedJourneys(activeUser.email);
 
       setSavedJourneys(data.journeys || []);
     } catch (error) {
@@ -266,7 +279,12 @@ function App() {
           }
         : journey;
 
-      await createSavedJourney(payload);
+      if (!user) {
+        setAuthOpen(true);
+        setNotice("Sign in to save this journey to your UrbanGo account.");
+        return;
+      }
+      await createSavedJourney({ ...payload, ownerEmail: user.email });
 
       setNotice(
         `${
@@ -327,7 +345,17 @@ function App() {
     <>
       <div id="top" />
 
-      <Header />
+      <Header
+        user={user}
+        onSignIn={() => setAuthOpen(true)}
+        onSignOut={() => {
+          localStorage.removeItem("urbango-session");
+          setUser(null);
+          setSavedJourneys([]);
+          setJourneyHistory([]);
+          setNotice("You have signed out of UrbanGo.");
+        }}
+      />
 
       <main>
         <Hero
@@ -366,12 +394,20 @@ function App() {
             />
           )}
 
-          <Stats stats={statistics} />
+          <Stats stats={{ ...statistics, savedJourneys: savedJourneys.length, favouriteJourneys: savedJourneys.filter((journey) => journey.favourite).length }} />
+
+          <TransportStory />
 
           <QuickActions />
 
           <JourneyPlanner
             onSaveJourney={handleSaveJourney}
+            onJourneyPlanned={(journey) => {
+              if (!user) return;
+              const nextHistory = [{ ...journey, id: Date.now(), viewedAt: new Date().toISOString() }, ...journeyHistory].slice(0, 12);
+              setJourneyHistory(nextHistory);
+              localStorage.setItem(`urbango-history-${user.email}`, JSON.stringify(nextHistory));
+            }}
           />
 
           {notice && (
@@ -390,57 +426,34 @@ function App() {
             onRefresh={loadStatus}
           />
 
-          <section
-            className="saved-section"
-            id="journeys"
-          >
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">
-                  YOUR TRAVEL
-                </p>
-
-                <h2>Saved journeys</h2>
-
-                <p>
-                  Saved journeys are stored on the
-                  UrbanGo server and remain after a
-                  restart.
-                </p>
-              </div>
-
-              <span className="result-count">
-                {savedJourneys.length} saved
-              </span>
-            </div>
-
-            {savedJourneys.length === 0 ? (
-              <div className="message-card">
-                You haven't saved any journeys yet.
-              </div>
-            ) : (
-              <div className="journey-list">
-                {savedJourneys.map((journey) => (
-                  <SavedJourney
-                    key={journey.id}
-                    journey={journey}
-                    onFavourite={
-                      handleFavouriteJourney
-                    }
-                    onDelete={
-                      handleDeleteJourney
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+          <UserJourneyHub
+            user={user}
+            journeys={savedJourneys}
+            history={journeyHistory}
+            onFavourite={handleFavouriteJourney}
+            onDelete={handleDeleteJourney}
+            onSignIn={() => setAuthOpen(true)}
+          />
 
           <TravelInformation />
 
           <AccommodationFinder />
         </div>
       </main>
+
+      <AuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onAuthenticated={(account) => {
+          localStorage.setItem("urbango-session", JSON.stringify(account));
+          setUser(account);
+          setAuthOpen(false);
+          const history = JSON.parse(localStorage.getItem(`urbango-history-${account.email}`) || "[]");
+          setJourneyHistory(history);
+          loadSavedJourneys(account);
+          setNotice(`Welcome ${account.name}. Your UrbanGo account is ready.`);
+        }}
+      />
 
       <footer>
         <div className="footer-container">
@@ -453,7 +466,7 @@ function App() {
           </div>
 
           <span>
-            Web Development II · Live TfL-powered
+            C. Oppong Web Development II · Live TfL-powered
             travel application
           </span>
         </div>

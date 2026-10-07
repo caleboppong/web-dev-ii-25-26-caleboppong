@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 async function requestUrbanGo(endpoint, options = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -87,8 +87,9 @@ export function getServiceStatus() {
   );
 }
 
-export function getSavedJourneys() {
-  return requestUrbanGo("/journeys");
+export function getSavedJourneys(ownerEmail = "") {
+  const query = ownerEmail ? `?owner=${encodeURIComponent(ownerEmail)}` : "";
+  return requestUrbanGo(`/journeys${query}`);
 }
 
 export function getStatistics() {
